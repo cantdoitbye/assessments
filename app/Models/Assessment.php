@@ -8,20 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Assessment extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+   protected $fillable = [
         'title',
+        'slug', 
         'description',
         'status',
+        'link_url',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'status' => 'string',
-        ];
-    }
 
     public function questions(): HasMany
     {
@@ -30,7 +23,7 @@ class Assessment extends Model
 
     public function resultCategories(): HasMany
     {
-        return $this->hasMany(ResultCategory::class)->orderBy('order');
+        return $this->hasMany(ResultCategory::class);
     }
 
     public function userAssessments(): HasMany
@@ -38,15 +31,8 @@ class Assessment extends Model
         return $this->hasMany(UserAssessment::class);
     }
 
-    public function isActive(): bool
+    public function getRouteKeyName(): string
     {
-        return $this->status === 'active';
-    }
-
-    public function getStatusBadgeAttribute(): string
-    {
-        return $this->status === 'active' 
-            ? '<span class="badge bg-success">Active</span>' 
-            : '<span class="badge bg-secondary">Inactive</span>';
+        return 'slug';
     }
 }

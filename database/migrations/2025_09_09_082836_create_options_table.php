@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('options', function (Blueprint $table) {
-           $table->id();
+            $table->id();
             $table->foreignId('question_id')->constrained()->onDelete('cascade');
             $table->string('option_text');
-            $table->decimal('score', 8, 2)->default(0);
-            $table->string('trait')->nullable();
+            $table->json('score_map'); // {"assertive": 1, "passive": 0}
             $table->timestamps();
         });
     }

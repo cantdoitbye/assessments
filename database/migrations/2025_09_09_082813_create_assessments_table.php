@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('assessments', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('description');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('link_url')->nullable();
             $table->timestamps();
         });
     }

@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
-         $table->id();
+          $table->id();
             $table->foreignId('assessment_id')->constrained()->onDelete('cascade');
             $table->text('question_text');
-            $table->enum('type', ['multiple_choice', 'likert_scale', 'situational_choice'])->default('multiple_choice');
-            $table->integer('order')->default(0);
+            $table->integer('order');
             $table->timestamps();
+            
+            $table->index(['assessment_id', 'order']);
         });
     }
 

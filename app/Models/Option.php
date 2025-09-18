@@ -9,24 +9,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Option extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+   protected $fillable = [
         'question_id',
         'option_text',
-        'value',
-        'scoring',
-        'order',
+        'score_map',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'scoring' => 'array',
-        ];
-    }
+    protected $casts = [
+        'score_map' => 'array',
+    ];
 
-    public function question(): BelongsTo
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }
@@ -34,10 +27,5 @@ class Option extends Model
     public function userAnswers(): HasMany
     {
         return $this->hasMany(UserAnswer::class);
-    }
-
-    public function getScoreForCategory(string $categoryCode): int
-    {
-        return $this->scoring[$categoryCode] ?? 0;
     }
 }

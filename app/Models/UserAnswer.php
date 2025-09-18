@@ -8,25 +8,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserAnswer extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+     protected $fillable = [
         'user_assessment_id',
         'question_id',
         'option_id',
     ];
 
-    public function userAssessment(): BelongsTo
+    public function userAssessment()
     {
         return $this->belongsTo(UserAssessment::class);
     }
 
-    public function question(): BelongsTo
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }
 
-    public function option(): BelongsTo
+    public function option()
     {
         return $this->belongsTo(Option::class);
     }

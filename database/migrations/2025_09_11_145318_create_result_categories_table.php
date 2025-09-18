@@ -14,13 +14,9 @@ return new class extends Migration
         Schema::create('result_categories', function (Blueprint $table) {
               $table->id();
             $table->foreignId('assessment_id')->constrained()->onDelete('cascade');
-            $table->string('name'); // e.g., "Assertive", "Passive", "Systematic"
-            $table->string('code'); // e.g., "A", "B", "SYS"
+            $table->string('name');
             $table->text('description')->nullable();
-            $table->integer('order')->default(0);
             $table->timestamps();
-            
-            $table->unique(['assessment_id', 'code']);
         });
     }
 

@@ -8,17 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ResultCategory extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+     protected $fillable = [
         'assessment_id',
         'name',
-        'code',
         'description',
-        'order',
     ];
 
-    public function assessment(): BelongsTo
+    public function assessment()
     {
         return $this->belongsTo(Assessment::class);
     }

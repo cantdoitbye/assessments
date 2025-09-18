@@ -9,33 +9,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserAssessment extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
+      protected $fillable = [
         'user_id',
         'assessment_id',
-        'category_scores',
-        'dominant_category',
-        'started_at',
-        'completed_at',
-        'status',
+        'result_json',
+        'final_result',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'category_scores' => 'array',
-            'started_at' => 'datetime',
-            'completed_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'result_json' => 'array',
+    ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function assessment(): BelongsTo
+    public function assessment()
     {
         return $this->belongsTo(Assessment::class);
     }
@@ -43,43 +33,5 @@ class UserAssessment extends Model
     public function userAnswers(): HasMany
     {
         return $this->hasMany(UserAnswer::class);
-    }
-
-    public function calculateResults(): void
-    {
-        $categoryScores = [];
-        $categories = $this->assessment->resultCategories;
-        
-        // Initialize scores
-        foreach ($categories as $category) {
-            $categoryScores[$category->code] = 0;
-        }
-
-        // Calculate scores from answers
-        foreach ($this->userAnswers as $answer) {
-            $scoring = $answer->option->scoring ?? [];
-            foreach ($scoring as $categoryCode => $score) {
-                $categoryScores[$categoryCode] = ($categoryScores[$categoryCode] ?? 0) + $score;
-            }
-        }
-
-        // Find dominant category
-        $dominantCategory = array_keys($categoryScores, max($categoryScores))[0];
-
-        $this->update([
-            'category_scores' => $categoryScores,
-            'dominant_category' => $dominantCategory,
-            'completed_at' => now(),
-            'status' => 'completed'
-        ]);
-    }
-
-    public function getDominantCategoryNameAttribute(): string
-    {
-        $category = $this->assessment->resultCategories()
-            ->where('code', $this->dominant_category)
-            ->first();
-        
-        return $category ? $category->name : $this->dominant_category;
     }
 }
