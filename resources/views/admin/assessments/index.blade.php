@@ -68,10 +68,12 @@
                                        class="btn btn-outline-primary" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.assessments.edit', $assessment) }}" 
-                                       class="btn btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+
+                                      <a href="{{ route('assessments.show', $assessment->slug) }}" 
+                                       class="btn btn-outline-info" title="Preview Assessment" target="_blank">
+                                        <i class="bi bi-box-arrow-up-right"></i>
                                     </a>
+                                
                                     <a href="{{ route('admin.assessments.export', $assessment) }}" 
                                        class="btn btn-outline-success" title="Export">
                                         <i class="bi bi-download"></i>

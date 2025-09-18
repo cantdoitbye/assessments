@@ -129,14 +129,14 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
+                    {{-- <div class="col-md-4">
                         <a href="{{ route('admin.assessments.create') }}" class="btn btn-outline-primary w-100 py-3">
                             <i class="bi bi-plus-circle display-6 d-block mb-2"></i>
                             <strong>Create Assessment</strong>
                             <br>
                             <small>Add a new assessment</small>
                         </a>
-                    </div>
+                    </div> --}}
                     <div class="col-md-4">
                         <a href="{{ route('admin.assessments.index') }}" class="btn btn-outline-success w-100 py-3">
                             <i class="bi bi-gear display-6 d-block mb-2"></i>

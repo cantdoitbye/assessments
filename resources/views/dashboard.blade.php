@@ -180,10 +180,10 @@
                                     </svg>
                                 </span>
                             </div>
-                            <div class="mt-4">
+                            {{-- <div class="mt-4">
                                 <h3 class="text-lg font-medium text-gray-900">Create Assessment</h3>
                                 <p class="mt-2 text-sm text-gray-500">Add a new assessment to the system</p>
-                            </div>
+                            </div> --}}
                         </a>
 
                         <a href="{{ route('admin.assessments.index') }}" 
