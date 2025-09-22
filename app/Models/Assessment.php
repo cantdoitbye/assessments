@@ -35,4 +35,14 @@ class Assessment extends Model
     {
         return 'slug';
     }
+
+    public function assessmentCodes()
+{
+    return $this->hasMany(AssessmentCode::class);
+}
+
+public function activeAssessmentCodes()
+{
+    return $this->hasMany(AssessmentCode::class)->where('is_active', true);
+}
 }

@@ -73,6 +73,12 @@
                                        class="btn btn-outline-info" title="Preview Assessment" target="_blank">
                                         <i class="bi bi-box-arrow-up-right"></i>
                                     </a>
+
+                                  <a href="{{ route('admin.assessments.codes', $assessment->slug) }}" 
+   class="btn btn-outline-info" title="Codes" target="_blank">
+    <i class="bi bi-code-slash"></i>
+</a>
+
                                 
                                     <a href="{{ route('admin.assessments.export', $assessment) }}" 
                                        class="btn btn-outline-success" title="Export">

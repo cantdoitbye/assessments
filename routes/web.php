@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AssessmentCodeController;
 use App\Http\Controllers\Admin\AssessmentController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\OptionController;
@@ -24,6 +25,9 @@ Route::prefix('assessments')->name('assessments.')->group(function () {
     Route::post('/{assessment}/question/{questionNumber}', [ControllersAssessmentController::class, 'answer'])->name('answer');
     Route::get('/result/{userAssessment}', [ControllersAssessmentController::class, 'result'])->name('result');
 });
+
+Route::post('/assessments/{assessment}/verify-code', [ControllersAssessmentController::class, 'verifyCode'])->name('assessments.verify-code');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -56,6 +60,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->middlewar
        
         });
     });
+
+      Route::prefix('assessments/{assessment}')->group(function () {
+   Route::get('/codes', [AssessmentCodeController::class, 'index'])->name('assessments.codes');
+Route::post('/codes', [AssessmentCodeController::class, 'storeCode'])->name('assessments.store-code');
+Route::post('/codes/toggle', [AssessmentCodeController::class, 'toggleCode'])->name('assessments.toggle-code');
+Route::delete('/codes/delete', [AssessmentCodeController::class, 'deleteCode'])->name('assessments.delete-code');
+});
 });
 
 require __DIR__.'/auth.php';

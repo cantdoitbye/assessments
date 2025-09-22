@@ -3,18 +3,51 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
+use App\Models\AssessmentCode;
 use App\Models\UserAssessment;
 use Illuminate\Http\Request;
 
 class AssessmentController extends Controller
 {
-    public function show(Assessment $assessment)
+    public function show(Assessment $assessment, Request $request)
     {
         if ($assessment->status !== 'active') {
             abort(404);
         }
 
+         // Check if assessment requires access code
+        if ($assessment->activeAssessmentCodes()->exists()) {
+            // If no code provided or invalid code, show code entry form
+            if (!$request->has('access_code') || !$this->validateAccessCode($request->access_code, $assessment)) {
+                return view('assessments.access-code', compact('assessment'));
+            }
+            
+            // Store valid code in session for this assessment
+            session()->put('valid_access_code_' . $assessment->id, $request->access_code);
+        }
+
         return view('assessments.show', compact('assessment'));
+    }
+
+    public function verifyCode(Request $request, Assessment $assessment)
+    {
+        $request->validate([
+            'access_code' => 'required|string'
+        ]);
+
+        $code = AssessmentCode::findValidCode($request->access_code, $assessment->id);
+
+        if (!$code) {
+            return back()->withErrors([
+                'access_code' => 'Invalid or expired access code.'
+            ])->withInput();
+        }
+
+        // Redirect to assessment with code parameter
+        return redirect()->route('assessments.show', [
+            'assessment' => $assessment,
+            'access_code' => $request->access_code
+        ]);
     }
 
     public function start(Assessment $assessment)
@@ -81,6 +114,11 @@ class AssessmentController extends Controller
         }
     }
 
+      private function validateAccessCode(string $code, Assessment $assessment): bool
+    {
+        $codeModel = AssessmentCode::findValidCode($code, $assessment->id);
+        return $codeModel !== null;
+    }
     private function complete(Assessment $assessment)
     {
         $session = session()->get('assessment_' . $assessment->id);

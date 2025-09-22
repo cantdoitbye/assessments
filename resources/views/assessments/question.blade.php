@@ -38,24 +38,36 @@
                 
                 @foreach($question->options as $index => $option)
                     <label class="block group cursor-pointer">
-                        <input type="radio" name="option_id" value="{{ $option->id }}" 
-                               class="sr-only peer" required>
+                        <input type="radio" 
+                               name="option_id" 
+                               value="{{ $option->id }}" 
+                               id="option_{{ $option->id }}"
+                               class="sr-only peer" 
+                               required>
                         <div class="option-card border-2 border-gray-200 rounded-2xl p-8 bg-white shadow-sm
                                    hover:border-blue-300 hover:shadow-md peer-checked:border-blue-500 
                                    peer-checked:bg-blue-50 peer-checked:ring-4 peer-checked:ring-blue-100
-                                   group-hover:bg-gray-50">
+                                   group-hover:bg-gray-50 transition-all duration-200">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-6 h-6 border-2 border-gray-300 rounded-full peer-checked:border-blue-500 
-                                                peer-checked:bg-blue-500 flex items-center justify-center
-                                                group-hover:border-blue-400 transition-all">
-                                        <div class="w-3 h-3 bg-white rounded-full opacity-0 peer-checked:opacity-100 scale-0 peer-checked:scale-100 transition-all"></div>
+                                    <!-- Custom Radio Button Visual -->
+                                    <div class="relative">
+                                        <div class="w-6 h-6 border-2 border-gray-300 rounded-full 
+                                                    peer-checked:border-blue-500 peer-checked:bg-blue-500 
+                                                    group-hover:border-blue-400 transition-all duration-200
+                                                    flex items-center justify-center">
+                                            <!-- Inner dot that appears when selected -->
+                                            <div class="w-3 h-3 bg-white rounded-full scale-0 
+                                                        peer-checked:scale-100 transition-transform duration-200"></div>
+                                        </div>
                                     </div>
-                                    <span class="text-xl font-medium text-gray-900 group-hover:text-blue-700 peer-checked:text-blue-700">
+                                    <span class="text-xl font-medium text-gray-900 group-hover:text-blue-700 
+                                                 peer-checked:text-blue-700 transition-colors duration-200">
                                         {{ $option->option_text }}
                                     </span>
                                 </div>
-                                <div class="opacity-0 peer-checked:opacity-100 transition-opacity">
+                                <!-- Checkmark icon that appears when selected -->
+                                <div class="opacity-0 peer-checked:opacity-100 transition-opacity duration-200">
                                     <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                     </svg>
@@ -107,11 +119,49 @@
     </main>
 </div>
 
+@push('styles')
+<style>
+/* Fix for peer selectors on radio buttons */
+input[type="radio"]:checked + .option-card .w-6.h-6.border-2 {
+    border-color: #3B82F6 !important;
+    background-color: #3B82F6 !important;
+}
+
+input[type="radio"]:checked + .option-card .w-6.h-6.border-2 .w-3.h-3 {
+    transform: scale(1) !important;
+}
+
+input[type="radio"]:checked + .option-card {
+    border-color: #3B82F6 !important;
+    background-color: #EFF6FF !important;
+    box-shadow: 0 0 0 4px #DBEAFE !important;
+}
+
+input[type="radio"]:checked + .option-card span {
+    color: #1D4ED8 !important;
+}
+
+input[type="radio"]:checked + .option-card .opacity-0 {
+    opacity: 1 !important;
+}
+</style>
+@endpush
+
 @push('scripts')
 <script>
-    // Auto-submit on option selection (optional)
+    // Enhanced option selection handling
     document.querySelectorAll('input[name="option_id"]').forEach(radio => {
         radio.addEventListener('change', function() {
+            // Remove previous selections visually (backup for CSS)
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to current option
+            if (this.checked) {
+                this.nextElementSibling.classList.add('selected');
+            }
+            
             // Optional: Add small delay and auto-submit
             // setTimeout(() => this.form.submit(), 500);
         });
