@@ -87,9 +87,9 @@
                         <tr>
                             <td>
                                 <div>
-                                    <strong class="text-dark">{{ $submission->user->name ?? 'Guest User' }}</strong>
+                                    <strong class="text-dark">{{ $submission->user_name ?? 'Guest User' }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ $submission->user->email ?? 'N/A' }}</small>
+                                    <small class="text-muted">{{ $submission->user_email ?? 'N/A' }}</small>
                                 </div>
                             </td>
                             <td>
