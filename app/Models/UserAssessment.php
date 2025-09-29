@@ -11,6 +11,8 @@ class UserAssessment extends Model
 {
       protected $fillable = [
         'user_id',
+        'user_name',
+        'user_email',
         'assessment_id',
         'result_json',
         'final_result',

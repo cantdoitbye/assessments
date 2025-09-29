@@ -12,18 +12,65 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Access Code Required</h1>
-            <p class="text-gray-600">Please enter your access code to continue with this assessment</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Enter Your Details</h1>
+            <p class="text-gray-600">Please provide your information to access this assessment</p>
         </div>
 
-        <!-- Access Code Form -->
+        <!-- Access Code Form with Name and Email -->
         <div class="bg-white rounded-2xl shadow-xl p-8">
             <form method="POST" action="{{ route('assessments.verify-code', $assessment) }}">
                 @csrf
                 
+                <!-- Name Field -->
+                <div class="mb-6">
+                    <label for="user_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="user_name" 
+                           name="user_name" 
+                           value="{{ old('user_name') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('user_name') border-red-500 @enderror"
+                           placeholder="Enter your full name"
+                           required>
+                    
+                    @error('user_name')
+                        <div class="mt-2 flex items-center text-red-600">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-sm">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
+
+                <!-- Email Field -->
+                <div class="mb-6">
+                    <label for="user_email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           id="user_email" 
+                           name="user_email" 
+                           value="{{ old('user_email') }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('user_email') border-red-500 @enderror"
+                           placeholder="your.email@example.com"
+                           required>
+                    
+                    @error('user_email')
+                        <div class="mt-2 flex items-center text-red-600">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-sm">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
+
+                <!-- Access Code Field -->
                 <div class="mb-6">
                     <label for="access_code" class="block text-sm font-medium text-gray-700 mb-2">
-                        Access Code
+                        Access Code <span class="text-red-500">*</span>
                     </label>
                     <input type="text" 
                            id="access_code" 
@@ -89,9 +136,9 @@ document.getElementById('access_code').addEventListener('input', function(e) {
     e.target.value = e.target.value.toUpperCase();
 });
 
-// Auto-focus on load
+// Auto-focus on name field on load
 window.addEventListener('load', function() {
-    document.getElementById('access_code').focus();
+    document.getElementById('user_name').focus();
 });
 </script>
 @endpush

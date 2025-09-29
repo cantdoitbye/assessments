@@ -32,9 +32,12 @@ class AssessmentController extends Controller
     public function verifyCode(Request $request, Assessment $assessment)
     {
         $request->validate([
+              'user_name' => 'required|string|max:255',
+            'user_email' => 'required|email|max:255',
             'access_code' => 'required|string'
         ]);
 
+       
         $code = AssessmentCode::findValidCode($request->access_code, $assessment->id);
 
         if (!$code) {
@@ -42,6 +45,12 @@ class AssessmentController extends Controller
                 'access_code' => 'Invalid or expired access code.'
             ])->withInput();
         }
+
+          // Store user info in session for later use when completing assessment
+        session()->put('user_info_' . $assessment->id, [
+            'user_name' => $request->user_name,
+            'user_email' => $request->user_email,
+        ]);
 
         // Redirect to assessment with code parameter
         return redirect()->route('assessments.show', [
@@ -122,6 +131,8 @@ class AssessmentController extends Controller
     private function complete(Assessment $assessment)
     {
         $session = session()->get('assessment_' . $assessment->id);
+                $userInfo = session()->get('user_info_' . $assessment->id, []);
+
         
         // Calculate scores
         $categoryScores = [];
@@ -150,6 +161,8 @@ class AssessmentController extends Controller
         // Save to database
         $userAssessment = UserAssessment::create([
             'user_id' => auth()->id(),
+            'user_name' => $userInfo['user_name'] ?? null,
+            'user_email' => $userInfo['user_email'] ?? null,
             'assessment_id' => $assessment->id,
             'result_json' => $categoryScores,
             'final_result' => $finalResult,
@@ -166,6 +179,7 @@ class AssessmentController extends Controller
 
         // Clear session
         session()->forget('assessment_' . $assessment->id);
+                session()->forget('user_info_' . $assessment->id);
 
         return redirect()->route('assessments.result', $userAssessment);
     }
