@@ -128,13 +128,101 @@ class AssessmentController extends Controller
         $codeModel = AssessmentCode::findValidCode($code, $assessment->id);
         return $codeModel !== null;
     }
-    private function complete(Assessment $assessment)
-    {
-        $session = session()->get('assessment_' . $assessment->id);
-                $userInfo = session()->get('user_info_' . $assessment->id, []);
+    // private function complete(Assessment $assessment)
+    // {
+    //     $session = session()->get('assessment_' . $assessment->id);
+    //             $userInfo = session()->get('user_info_' . $assessment->id, []);
 
         
-        // Calculate scores
+    //     // Calculate scores
+    //     $categoryScores = [];
+    //     $categories = $assessment->resultCategories;
+        
+    //     // Initialize scores
+    //     foreach ($categories as $category) {
+    //         $categoryScores[$category->name] = 0;
+    //     }
+
+    //     // Calculate scores from answers
+    //     foreach ($session['answers'] as $questionNumber => $optionId) {
+    //         $option = \App\Models\Option::find($optionId);
+    //         if ($option && $option->score_map) {
+    //             foreach ($option->score_map as $category => $score) {
+    //                 if (isset($categoryScores[$category])) {
+    //                     $categoryScores[$category] += $score;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // Find dominant category
+    //     $finalResult = array_keys($categoryScores, max($categoryScores))[0];
+
+    //     // Save to database
+    //     $userAssessment = UserAssessment::create([
+    //         'user_id' => auth()->id(),
+    //         'user_name' => $userInfo['user_name'] ?? null,
+    //         'user_email' => $userInfo['user_email'] ?? null,
+    //         'assessment_id' => $assessment->id,
+    //         'result_json' => $categoryScores,
+    //         'final_result' => $finalResult,
+    //     ]);
+
+    //     // Save individual answers
+    //     foreach ($session['answers'] as $questionNumber => $optionId) {
+    //         \App\Models\UserAnswer::create([
+    //             'user_assessment_id' => $userAssessment->id,
+    //             'question_id' => $assessment->questions()->where('order', $questionNumber)->first()->id,
+    //             'option_id' => $optionId,
+    //         ]);
+    //     }
+
+    //     // Clear session
+    //     session()->forget('assessment_' . $assessment->id);
+    //             session()->forget('user_info_' . $assessment->id);
+
+    //     return redirect()->route('assessments.result', $userAssessment);
+    // }
+
+    private function complete(Assessment $assessment)
+{
+    $session = session()->get('assessment_' . $assessment->id);
+    $userInfo = session()->get('user_info_' . $assessment->id, []);
+
+    // SPECIAL HANDLING FOR BRAIN DOMINANCE TEST
+    if ($assessment->slug === 'brain-dominance-test') {
+        $leftScore = 0;
+        $rightScore = 0;
+        
+        // Calculate left and right brain scores
+        foreach ($session['answers'] as $questionNumber => $optionId) {
+            $option = \App\Models\Option::find($optionId);
+            if ($option && $option->score_map) {
+                $leftScore += $option->score_map['Left'] ?? 0;
+                $rightScore += $option->score_map['Right'] ?? 0;
+            }
+        }
+        
+        // Determine category based on scoring rules
+        if ($leftScore >= 24) {
+            $finalResult = 'Strong Left-Brain';
+        } elseif ($leftScore >= 18) {
+            $finalResult = 'Moderate Left-Brain';
+        } elseif ($leftScore >= 14 && $rightScore >= 14) {
+            $finalResult = 'Balanced/Whole-Brain';
+        } elseif ($rightScore >= 18) {
+            $finalResult = 'Moderate Right-Brain';
+        } else {
+            $finalResult = 'Strong Right-Brain';
+        }
+        
+        $categoryScores = [
+            'Left' => $leftScore,
+            'Right' => $rightScore
+        ];
+        
+    } else {
+        // STANDARD SCORING FOR ALL OTHER ASSESSMENTS
         $categoryScores = [];
         $categories = $assessment->resultCategories;
         
@@ -157,38 +245,52 @@ class AssessmentController extends Controller
 
         // Find dominant category
         $finalResult = array_keys($categoryScores, max($categoryScores))[0];
-
-        // Save to database
-        $userAssessment = UserAssessment::create([
-            'user_id' => auth()->id(),
-            'user_name' => $userInfo['user_name'] ?? null,
-            'user_email' => $userInfo['user_email'] ?? null,
-            'assessment_id' => $assessment->id,
-            'result_json' => $categoryScores,
-            'final_result' => $finalResult,
-        ]);
-
-        // Save individual answers
-        foreach ($session['answers'] as $questionNumber => $optionId) {
-            \App\Models\UserAnswer::create([
-                'user_assessment_id' => $userAssessment->id,
-                'question_id' => $assessment->questions()->where('order', $questionNumber)->first()->id,
-                'option_id' => $optionId,
-            ]);
-        }
-
-        // Clear session
-        session()->forget('assessment_' . $assessment->id);
-                session()->forget('user_info_' . $assessment->id);
-
-        return redirect()->route('assessments.result', $userAssessment);
     }
+
+    // Save to database
+    $userAssessment = UserAssessment::create([
+        'user_id' => auth()->id(),
+        'user_name' => $userInfo['user_name'] ?? null,
+        'user_email' => $userInfo['user_email'] ?? null,
+        'assessment_id' => $assessment->id,
+        'result_json' => $categoryScores,
+        'final_result' => $finalResult,
+    ]);
+
+    // Save individual answers
+    foreach ($session['answers'] as $questionNumber => $optionId) {
+        \App\Models\UserAnswer::create([
+            'user_assessment_id' => $userAssessment->id,
+            'question_id' => $assessment->questions()->where('order', $questionNumber)->first()->id,
+            'option_id' => $optionId,
+        ]);
+    }
+
+    // Clear session
+    session()->forget('assessment_' . $assessment->id);
+    session()->forget('user_info_' . $assessment->id);
+
+    return redirect()->route('assessments.result', $userAssessment);
+}
 
     public function result(UserAssessment $userAssessment)
     {
         $resultCategory = $userAssessment->assessment->resultCategories()
             ->where('name', $userAssessment->final_result)
             ->first();
+
+
+               // Custom view for conflict management
+    if ($userAssessment->assessment->slug === 'conflict-management-style') {
+        return view('assessments.conflict-result', compact('userAssessment', 'resultCategory'));
+    }
+
+    // Custom view for brain dominance
+    if ($userAssessment->assessment->slug === 'brain-dominance-test') {
+        return view('assessments.brain-result', compact('userAssessment', 'resultCategory'));
+    }
+
+            
 
         return view('assessments.result', compact('userAssessment', 'resultCategory'));
     }
