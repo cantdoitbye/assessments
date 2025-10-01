@@ -76,6 +76,13 @@
                             <i class="bi bi-speedometer2 me-2"></i>
                             Dashboard
                         </a>
+                       {{-- @if(auth()->check() && auth()->user()->isMasterAdmin()) --}}
+    <a href="{{ route('admin.sub-admins.index') }}" 
+       class="nav-link {{ request()->routeIs('admin.sub-admins.*') ? 'active' : '' }}">
+        <i class="bi bi-people me-2"></i>
+        Sub Admins
+    </a>
+{{-- @endif --}}
                         <a href="{{ route('admin.assessments.index') }}" 
                            class="nav-link {{ request()->routeIs('admin.assessments.*') ? 'active' : '' }}">
                             <i class="bi bi-journal-text me-2"></i>

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->middlewar
     
     Route::resource('assessments', AssessmentController::class);
         Route::get('assessments/{assessment}/export', [AssessmentController::class, 'export'])->name('assessments.export');
+    Route::resource('sub-admins', \App\Http\Controllers\Admin\SubAdminController::class);
 
     Route::prefix('assessments/{assessment}')->group(function () {
         Route::resource('questions', QuestionController::class);

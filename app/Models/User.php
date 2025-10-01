@@ -16,6 +16,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'role',
+
     ];
 
     protected $hidden = [
@@ -32,8 +34,24 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin(): bool
+   
+       public function isAdmin(): bool
     {
-        return $this->is_admin;
+        return $this->is_admin || in_array($this->role, ['master_admin', 'sub_admin']);
+    }
+
+    public function isMasterAdmin(): bool
+    {
+        return $this->role === 'master_admin';
+    }
+
+    public function isSubAdmin(): bool
+    {
+        return $this->role === 'sub_admin';
+    }
+
+      public function userAssessments()
+    {
+        return $this->hasMany(UserAssessment::class);
     }
 }

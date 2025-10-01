@@ -67,6 +67,15 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                        @if(auth()->check() && auth()->user()->isMasterAdmin())
+    <a href="{{ route('admin.sub-admins.index') }}" 
+       class="nav-link {{ request()->routeIs('admin.sub-admins.*') ? 'active' : '' }}">
+        <i class="bi bi-people me-2"></i>
+        Sub Admins
+    </a>
+@endif
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.assessments.*') ? 'active' : '' }}" 
                                href="{{ route('admin.assessments.index') }}">
                                 <i class="bi bi-clipboard-check me-2"></i>
@@ -84,10 +93,10 @@
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i>
-                            Admin User
+                            {{ auth()->user()->name }}
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>
+                            {{-- <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li> --}}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
