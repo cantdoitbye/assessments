@@ -221,7 +221,61 @@ class AssessmentController extends Controller
             'Right' => $rightScore
         ];
         
-    } else {
+    } 
+    // SPECIAL HANDLING FOR TEMPERAMENT BLOCKS TO CREATIVITY
+    elseif ($assessment->slug === 'temperament-blocks-creativity') {
+        $categoryScores = [
+            'AA' => 0,
+            'C' => 0,
+            'R/S' => 0,
+            'FF' => 0,
+            'SS' => 0,
+            'RM' => 0,
+            'T' => 0,
+        ];
+        
+        // Calculate raw scores for each category
+        foreach ($session['answers'] as $questionNumber => $optionId) {
+            $option = \App\Models\Option::find($optionId);
+            if ($option && $option->score_map) {
+                foreach ($option->score_map as $category => $score) {
+                    if (isset($categoryScores[$category])) {
+                        $categoryScores[$category] += $score;
+                    }
+                }
+            }
+        }
+        
+        // Convert to percentages based on reference tables
+        $percentageScores = [];
+        $interpretations = [];
+        
+        foreach ($categoryScores as $category => $rawScore) {
+            if ($category === 'SS') {
+                // SS has different percentage table (10 questions, max 40)
+                $percentageScores[$category] = $this->getSSPercentage($rawScore);
+            } else {
+                // Other categories (5 questions each, max 20)
+                $percentageScores[$category] = $this->getStandardPercentage($rawScore);
+            }
+            
+            // Get interpretation based on percentage
+            $interpretations[$category] = $this->getInterpretation($percentageScores[$category]);
+        }
+        
+        // Store both raw scores and percentages
+        $categoryScores = [
+            'raw' => $categoryScores,
+            'percentages' => $percentageScores,
+            'interpretations' => $interpretations
+        ];
+        
+        // Final result is the category with highest percentage (for summary)
+        $maxPercentage = max($percentageScores);
+        $finalResult = array_search($maxPercentage, $percentageScores);
+        
+    }
+    else {
         // STANDARD SCORING FOR ALL OTHER ASSESSMENTS
         $categoryScores = [];
         $categories = $assessment->resultCategories;
@@ -273,6 +327,9 @@ class AssessmentController extends Controller
     return redirect()->route('assessments.result', $userAssessment);
 }
 
+
+
+
     public function result(UserAssessment $userAssessment)
     {
         $resultCategory = $userAssessment->assessment->resultCategories()
@@ -290,8 +347,59 @@ class AssessmentController extends Controller
         return view('assessments.brain-result', compact('userAssessment', 'resultCategory'));
     }
 
+     // Custom view for temperament blocks
+    if ($userAssessment->assessment->slug === 'temperament-blocks-creativity') {
+        return view('assessments.temperament-result', compact('userAssessment'));
+    }
+
             
 
         return view('assessments.result', compact('userAssessment', 'resultCategory'));
     }
+
+
+    /**
+ * Get percentage for standard categories (AA, C, R/S, FF, RM, T)
+ * Max score: 20 (5 questions × 4 points)
+ */
+private function getStandardPercentage($score)
+{
+    $percentageTable = [
+        5 => 0, 6 => 7, 7 => 13, 8 => 20, 9 => 27, 10 => 33,
+        11 => 40, 12 => 47, 13 => 53, 14 => 60, 15 => 67, 16 => 73,
+        17 => 80, 18 => 87, 19 => 93, 20 => 100
+    ];
+    
+    return $percentageTable[$score] ?? 0;
+}
+
+/**
+ * Get percentage for SS (Starved Sensibility)
+ * Max score: 40 (10 questions × 4 points)
+ */
+private function getSSPercentage($score)
+{
+    $percentageTable = [
+        10 => 0, 11 => 3, 12 => 7, 13 => 10, 14 => 15, 15 => 17,
+        16 => 20, 17 => 23, 18 => 27, 19 => 30, 20 => 33, 21 => 37,
+        22 => 40, 23 => 43, 24 => 47, 25 => 50, 26 => 53, 27 => 57,
+        28 => 60, 29 => 63, 30 => 67, 31 => 70, 32 => 73, 33 => 77,
+        34 => 80, 35 => 83, 36 => 87, 37 => 90, 38 => 93, 39 => 97,
+        40 => 100
+    ];
+    
+    return $percentageTable[$score] ?? 0;
+}
+
+/**
+ * Get interpretation label based on percentage
+ */
+private function getInterpretation($percentage)
+{
+    if ($percentage >= 60) return 'Very High';
+    if ($percentage >= 40) return 'High';
+    if ($percentage >= 25) return 'Average';
+    if ($percentage >= 15) return 'Low';
+    return 'Very Low';
+}
 }
