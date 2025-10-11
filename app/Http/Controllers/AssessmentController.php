@@ -352,6 +352,14 @@ class AssessmentController extends Controller
         return view('assessments.temperament-result', compact('userAssessment'));
     }
 
+       if ($userAssessment->assessment->slug === 'decision-making-style') {
+        return view('assessments.decision-result', compact('userAssessment', 'resultCategory'));
+    }
+
+
+      if ($userAssessment->assessment->slug === 'situational-leadership-style') {
+        return view('assessments.leadership-result', compact('userAssessment', 'resultCategory'));
+    }
             
 
         return view('assessments.result', compact('userAssessment', 'resultCategory'));
